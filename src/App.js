@@ -6,6 +6,7 @@ import MenuButton from "./Components/MenuButton";
 import ColorPicker from "./Components/ColorPicker";
 import "tachyons";
 import './CSS/App.css';
+import About from './Components/About.js';
 
 
 class App extends Component {
@@ -169,6 +170,7 @@ class App extends Component {
           <h1>Spritesheet Viewer</h1>
         </header>
         <main className="pt3 ph3 flex">
+          <div className="w-100 overflow-hidden">
 					<Preview 
 						ref={this.preview} 
 						setImageLoaded={this.setImageLoaded} 
@@ -178,6 +180,8 @@ class App extends Component {
 							this.parameters.current.updateParameters(...props);
 						}}
 					/>
+          {this.state.imageLoaded ? null : <About />}
+          </div>
           {
             this.state.imageLoaded ? 
             (<div id="controlPanel" className="ml3 w-100" >

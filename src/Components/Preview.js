@@ -286,7 +286,7 @@ class Preview extends React.Component {
 	}
     render() {
 		return (
-			<div className="w-100 overflow-hidden">
+			<div>
 				<div id="previewScreen">
 					<div className="resizeable box flex flex-column justify-between mb3">
 						<div className="overflow-auto flex h-100">

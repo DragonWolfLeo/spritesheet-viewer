@@ -9,7 +9,17 @@ h1 {
 main {   
     flex-direction: row;
 }
-
+p {
+  margin: 32px;
+  line-height: 1.4rem;
+}
+a {
+  color: black;
+  transition: 100ms color ease-out;
+}
+a:hover {
+  color: rgb(64, 60, 82);
+}
 /* Boxes */
 .box {
   background-color: rgb(98, 98, 121);
