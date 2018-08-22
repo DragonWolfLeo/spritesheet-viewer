@@ -163,6 +163,9 @@ class App extends Component {
   pickColor = () => {
     this.colorPicker.current.show();
   }
+  loadDemo = () => {
+    this.preview.current.setImage("./demo/demo.png", "demo");
+  }
   render() {
     return (
       <div className="App">
@@ -180,7 +183,7 @@ class App extends Component {
 							this.parameters.current.updateParameters(...props);
 						}}
 					/>
-          {this.state.imageLoaded ? null : <About />}
+          {this.state.imageLoaded ? null : <About loadDemo={this.loadDemo}/>}
           </div>
           {
             this.state.imageLoaded ? 
