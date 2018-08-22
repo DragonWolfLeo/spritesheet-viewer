@@ -16,12 +16,10 @@ class App extends Component {
       exporting: false,
       progress: 0,
     }
-    this.exporting = false;
     this.progressTask = null;
     this.preview = React.createRef();
     this.parameters = React.createRef();
     this.colorPicker = React.createRef();
-    this.filename = null;
     
     // Add drag and drop functionality
     window.ondragover = event => {
@@ -61,16 +59,15 @@ class App extends Component {
   // Function to remove .png from a string
   removePngExtension = str => str.substr(str.length-4) === ".png" ? str.substr(0,str.length-4) : str;
 
-  readDataTransfer = dataTransfer => {
-    // Read image files
-    const reader = new FileReader();
-    reader.onload = event => {
-      this.preview.current.setImage(event.target.result);
-    }
-    
+  readDataTransfer = dataTransfer => {    
     const files = dataTransfer.files
     if (files && files[0] && files[0].type === "image/png") {
-      this.filename = this.removePngExtension(files[0].name);
+      const filename = this.removePngExtension(files[0].name)
+      // Read image files
+      const reader = new FileReader();
+      reader.onload = event => {
+        this.preview.current.setImage(event.target.result, filename);
+      }
       reader.readAsDataURL(dataTransfer.files[0]);
     }
   }
@@ -82,7 +79,7 @@ class App extends Component {
     this.setState({imageLoaded: val});
   }
   // Gif Export
-  exportGIF = (event) => {
+  exportGIF = () => {
     if(this.state.exporting){
       // Cancel current progress
       if(this.gif){
@@ -130,7 +127,7 @@ class App extends Component {
     } while(a.playback === "f" ? i < a.totalFrames : i > 0 );
 
     gif.on('finished', blob => {
-      this.download(blob, `${this.filename || "untitled" }.gif`);
+      this.download(blob, `${a.filename || "untitled" }.gif`);
       this.closeExport();
     });
     

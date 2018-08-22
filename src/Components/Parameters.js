@@ -8,9 +8,9 @@ class Parameters extends React.Component {
             lockedParams: {},
         }
         
-        this.paramsList = ["scale", "delay", "fps", "fspan","trimR","trimL","trimU","trimD","playback","mirroring","flipping","transparent"];
+        this.paramsList = ["scale","delay","fps","fspan","trimR","trimL","trimU","trimD","playback","mirroring","flipping","transparent","horizontal"];
         this.lockedParams = {};
-        // List of functions that update parameters in the render() function
+        // Create a list of functions that can be synced with each parameter input
         this.updateFnList = {};
         this.paramsList.forEach(item=>{
             this.updateFnList[item] = this.updateInput(item);
@@ -97,26 +97,27 @@ class Parameters extends React.Component {
     createParam(label,id,field,special = "lock"){
         const locked = this.state.lockedParams[id] !== undefined;
         let specialBtn = null;
+        let specialOnClick = null;
         switch(special){
             case "lock":
                 specialBtn = (<IconButton 
-                    className={locked ? "o-70" : "o-20"}
+                    className={locked ? "paramIconButton" : "paramIconButtonOff"}
                     name={locked ? "lock" : "unlock"}
-                    title="Prevent from changing when loading a new image"
-                    onClick={()=>{
-                        // Toggle lock
-                        const lockedParams = this.props.preview.current.lockParam(id, this.state.lockedParams[id] === undefined);
-                        this.setState({lockedParams: lockedParams});
-                    }}                        
+                    title="Prevent from changing when loading a new image"                      
                 />)
+                specialOnClick = () => {
+                    // Toggle lock
+                    const lockedParams = this.props.preview.current.lockParam(id, this.state.lockedParams[id] === undefined);
+                    this.setState({lockedParams: lockedParams});
+                }
                 break;
             case "color":
                 specialBtn = (<IconButton 
-                    className="o-70"
+                    className="paramIconButton"
                     name="color-filter"
-                    title="Pick a color from the image"
-                    onClick={this.props.pickColor}                        
+                    title="Pick a color from the image"              
                 />)
+                specialOnClick = this.props.pickColor;
                 break;
             default:
                 specialBtn = null;
@@ -126,10 +127,10 @@ class Parameters extends React.Component {
                 <td style={{whiteSpace:"nowrap"}}>
                     <span className="mr2">{label}</span>
                 </td>
-                <td className="">
+                <td>
                     {field}
                 </td>
-                <td className="">
+                <td onClick={specialOnClick}>
                   {specialBtn}
                 </td>
             </tr>

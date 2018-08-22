@@ -23,19 +23,31 @@ main {
 }
 
 /* Icon buttons */
+.iconButton {
+  transition: 100ms opacity ease-out;
+  line-height: 0;
+}
+
 .controllerBtn {
   opacity: 0.7;
   padding: 0 8px;
   font-size: 24px;
 }
 
-.iconButton {
-  transition: 200ms opacity ease-out;
-  line-height: 0;
+.paramIconButton{
+  opacity: 0.7;
 }
 
-.iconButton:hover {
+.paramIconButtonOff{
+  opacity: 0.2;
+}
+
+.iconButton:hover, .paramIconButton:hover {
   opacity: 1;
+}
+
+.paramIconButtonOff:hover{
+  opacity: 0.4;
 }
 
 /* Color Picker */

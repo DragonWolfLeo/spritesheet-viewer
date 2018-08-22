@@ -12,7 +12,6 @@ class Preview extends React.Component {
 			frame: 0,
 			totalFrames: 0,
 		}
-		this.image = new Image();
 		this.animateTask = null;
 		this.resumeTask = null;
 		this.animation = null;
@@ -34,7 +33,6 @@ class Preview extends React.Component {
 				item += "Screen";
 				const target = document.getElementById(item);
 				if(!target){
-					console.log("Error! Could not find element "+item);
 					return;
 				}
 				if(item === scr){
@@ -54,14 +52,14 @@ class Preview extends React.Component {
 	onDragOver(event){
 		event.preventDefault();
 	}
-	onCanvasLoad = () =>{
+	setImage = (imagesrc, filename) =>{
 		if(!this.screens.current === "preview"){
 			// Don't interrupt preview with a loading screen
 			this.screens.changeTo("loading");
 		}
 		const canvas = document.getElementById("canvas");
-		const image = this.image;
-		image.src = this.props.image;
+		const image = new Image();
+		image.src = imagesrc;
 		image.onload = () => {
 			this.props.setImageLoaded();
 			this.screens.changeTo("preview");
@@ -72,10 +70,11 @@ class Preview extends React.Component {
 
 			// Init animation
 			const animation = {
+				filename,
     			frame: 0,
-    			image: image,
-				canvas: canvas,
-				horizontal: horizontal,
+    			image,
+				canvas,
+				horizontal,
 				fspan: horizontal ? height : width,
 				fthick: horizontal ? height : width,
 				srclength: horizontal ? width : height,
@@ -115,10 +114,6 @@ class Preview extends React.Component {
 	calcTotalFrames = () => {
 		const a = this.animation;
 		return Math.ceil(a.srclength/a.fspan);
-	}
-	setImage = (image) => {
-		this.onCanvasLoad();
-		this.image.src = image;
 	}
 
 	// Called by Parameters to set new settings
@@ -166,60 +161,58 @@ class Preview extends React.Component {
 		this.resumeTask = task;
 		task();
 	}
-    animate = (frameAdvance = null) => {
-    	return () => {
-			const {animation} = this;
-			const {playback, totalFrames} = animation;
-			switch(playback){
-				default:
-					break;
-				case "r":
-					animation.forward = false;
-					break;
-				case "f":
-					animation.forward = true;
-			}
 
-			// Update frame counter
-			animation.frame += frameAdvance === null ? ( animation.forward ? 1 : -1) : frameAdvance;
-			// Loop over if past range
-			const reversePlayback = frameAdvance === null && playback === "b";
-			if(animation.frame >= totalFrames){
-				if(reversePlayback){ 
-					animation.forward = false; 
-					animation.frame = totalFrames-2;
-				} else {
-					animation.frame = 0;
-				}
-			}else if(animation.frame < 0){
-				if(reversePlayback){ 
-					animation.forward = true; 
-					animation.frame = 1;
-				} else {
-					animation.frame = totalFrames-1;
-				}
-			}
-
-			// Update state
-			this.setState({frame: animation.frame});
-
-			// Cancel any existing animation request
-			if(animation.animReq !== null){
-				cancelAnimationFrame(animation.animReq);
-			}
-
-			// Make a new animation request
-			const {frame} = animation; // Declared here to stay in this scope
-			animation.animReq = requestAnimationFrame(()=>{
-				this.renderFrame(frame);
-			});
-	    };
-	}
-	// Draw frame to a canvas
-	renderFrame = (frame = null, animation, fillBG = false) => {
-		if(!animation){
-			({animation} = this);
+	// Return an animating function
+    animate = (frameAdvance = null) => () => {
+		const {animation} = this;
+		const {playback, totalFrames} = animation;
+		switch(playback){
+			default:
+				break;
+			case "r":
+				animation.forward = false;
+				break;
+			case "f":
+				animation.forward = true;
 		}
+
+		// Update frame counter
+		animation.frame += frameAdvance === null ? ( animation.forward ? 1 : -1) : frameAdvance;
+		// Loop over if past range
+		const reversePlayback = frameAdvance === null && playback === "b";
+		if(animation.frame >= totalFrames){
+			if(reversePlayback){ 
+				animation.forward = false; 
+				animation.frame = totalFrames-2;
+			} else {
+				animation.frame = 0;
+			}
+		}else if(animation.frame < 0){
+			if(reversePlayback){ 
+				animation.forward = true; 
+				animation.frame = 1;
+			} else {
+				animation.frame = totalFrames-1;
+			}
+		}
+
+		// Update state
+		this.setState({frame: animation.frame});
+
+		// Cancel any existing animation request
+		if(animation.animReq !== null){
+			cancelAnimationFrame(animation.animReq);
+		}
+
+		// Make a new animation request
+		const {frame} = animation; // Declared here to stay in this scope
+		animation.animReq = requestAnimationFrame(()=>{
+			this.renderFrame(frame);
+		});
+	};
+	
+	// Draw frame to a canvas
+	renderFrame = (frame=null, animation=this.animation, fillBG=false) => {
 		if(frame === null){
 			({frame} = animation);
 		}
