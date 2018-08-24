@@ -10,15 +10,24 @@ main {
     flex-direction: row;
 }
 p {
-  margin: 32px;
+  margin: 0;
   line-height: 1.4rem;
 }
-a {
-  color: black;
+a{
+  text-decoration: none;
+}
+li a {
+  font-weight: bold;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.2);
+  color: rgb(19, 47, 172);
   transition: 100ms color ease-out;
 }
+ul {
+  list-style: none;
+  padding: 0;
+}
 a:hover {
-  color: rgb(64, 60, 82);
+  color: rgb(88, 86, 212);
 }
 /* Boxes */
 .box {

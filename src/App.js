@@ -190,8 +190,8 @@ class App extends Component {
             (<div id="controlPanel" className="ml3 w-100" >
               <div className={"box pa3"}>
                 <Parameters ref={this.parameters} preview={this.preview} pickColor={this.pickColor}/>
-                <MenuButton className=" mb1 pv2" htmlFor="fileInput">Choose a file</MenuButton>
-                <MenuButton className=" mb1 pv2" 
+                <MenuButton className="mb1 pv2" htmlFor="fileInput">Choose a file</MenuButton>
+                <MenuButton className="mb1 pv2" 
                   cursor={this.state.exporting ? "progress" : null } 
                   onClick={this.exportGIF} color={["bg-dark-blue", "hover-bg-blue"]}
                   title={this.state.exporting ? "Click to abort" : null}

@@ -1,6 +1,5 @@
 import React from "react";
 import Controller from "./Controller";
-import "../CSS/Preview.css";
 import MenuButton from "./MenuButton";
 
 class Preview extends React.Component {
