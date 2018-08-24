@@ -108,7 +108,7 @@ class App extends Component {
     const gif = new GIF({
       workers: 4,
       workerScript: `${process.env.PUBLIC_URL}/gif.js/gif.worker.js`,
-      quality: 5,
+      quality: 1,
       transparent: Number("0x"+a.transparent.substr(1)),
     });
     this.gif = gif;
