@@ -4,12 +4,12 @@ import MenuButton from "./MenuButton.js";
 const About = ({loadDemo}) => {
     const menuButtonClassName = "white f3 h2 mb2 pv2 flex items-center justify-center"
 	return (
-		<div className="flex flex-wrap justify-center mv4">
+		<div className="flex flex-wrap justify-center mv4 mw7">
             <div className="w-100 mb3 mh3 flex flex-wrap justify-center" style={{flex: "2 0 50%"}}>
                 <p className="tj mb3" style={{flex: "2 0 60%"}}>
                     This is a tool designed to assist sprite animators. It takes either horizontal or vertical spritesheet and displays it as an animation, as well as providing an option to export to a GIF.
                 </p>
-                <div className="flex flex-column justify-center mh3">
+                <div className="flex flex-column justify-center mh3 pl3">
                     <h3 className="tc w-100 mv0">Tools Used</h3>
                     <ul>
                         <li><a href="https://reactjs.org/">React.js</a></li>
