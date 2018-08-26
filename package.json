@@ -6,7 +6,7 @@
     "gif.js.optimized": "^1.0.1",
     "react": "^16.4.2",
     "react-dom": "^16.4.2",
-    "react-scripts": "1.1.4",
+    "react-scripts": "1.1.5",
     "tachyons": "^4.11.1"
   },
   "scripts": {
