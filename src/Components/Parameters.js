@@ -8,7 +8,7 @@ class Parameters extends React.Component {
             lockedParams: {},
         }
         
-        this.paramsList = ["scale","delay","fps","fspan","trimR","trimL","trimU","trimD","playback","mirroring","flipping","transparent","horizontal"];
+        this.paramsList = ["filename", "scale","delay","fps","fspan","trimR","trimL","trimU","trimD","playback","mirroring","flipping","transparent","horizontal"];
         this.lockedParams = {};
         // Create a list of functions that can be synced with each parameter input
         this.updateFnList = {};
@@ -57,6 +57,15 @@ class Parameters extends React.Component {
         }
     }
 
+    // Default input change event
+    onDefaultChange = (prop) => {
+        return event => {
+            const o = {};
+            o[prop] = event.target.value;
+            this.props.preview.current.setNewProps(o);
+        }
+    }
+
     // Number input change event
     onNumberChange = (prop) => {
         return event => {
@@ -68,28 +77,10 @@ class Parameters extends React.Component {
         }
     }
 
-    // Select input change event
-    onSelectChange = (prop) => {
-        return event => {
-            const o = {};
-            o[prop] = event.target.value;
-            this.props.preview.current.setNewProps(o);
-        }
-    }
-
     // Number input change event for fps
     onDelayChange = (event) => {
         if(event.target.validity.valid) {
             this.props.preview.current.setNewProps({delay: 1000/event.target.value});
-        }
-    }
-
-    // Color input change event
-    onColorChange = (prop) => {
-        return event => {
-            const o = {};
-            o[prop] = event.target.value;
-            this.props.preview.current.setNewProps(o);
         }
     }
 
@@ -161,6 +152,12 @@ class Parameters extends React.Component {
 			<table className="mb3 w-100 bg-black-60">
                 <tbody>
                     {[
+                        this.createInput("Name", "filename",
+                        {
+                            type: "text",
+                            defaultValue: "Untitled",
+                            onChange: this.onDefaultChange("filename"),
+                        }),
                         this.createInput("Scale", "scale",
                         {
                             type: "number",
@@ -198,7 +195,7 @@ class Parameters extends React.Component {
                         }),
                         this.createSelect("Playback", "playback",
                         {
-                            onChange: this.onSelectChange("playback"),
+                            onChange: this.onDefaultChange("playback"),
                         },
                         {
                             f: "Forward",
@@ -209,7 +206,7 @@ class Parameters extends React.Component {
                             const lower = item.toLowerCase();
                             return this.createSelect(item, lower,
                             {
-                                onChange: this.onSelectChange(lower),
+                                onChange: this.onDefaultChange(lower),
                             }, 
                             {
                                 n: "No",
@@ -222,7 +219,7 @@ class Parameters extends React.Component {
                         {
                             type: "color",
                             defaultValue: "#FF00FF",
-                            onChange: this.onColorChange("transparent"),
+                            onChange: this.onDefaultChange("transparent"),
                         }, "color"),
                        
                     ]}
