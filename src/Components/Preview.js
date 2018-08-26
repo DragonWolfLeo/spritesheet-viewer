@@ -138,7 +138,6 @@ class Preview extends React.Component {
 
 	// Called by Parameters to lock or unlock a parameter
 	lockParam = (prop, lock) => {
-		console.log(lock ? "locking" : "unlocking", prop);
 		if(lock){
 			this.lockedParams[prop] = this.animation[prop];
 		} else {
