@@ -102,7 +102,7 @@ class App extends Component {
 
 
     const {animation, renderFrame} = this.preview.current;
-    const canvas = document.createElement("canvas");
+    const {exportCanvas: canvas} = this.refs;
     const a = Object.assign({}, animation, {canvas}); // Make new animation for exportCanvas
 
     const gif = new GIF({
@@ -216,6 +216,7 @@ class App extends Component {
             accept=".png"
             onChange={this.onChooseSource}
           />
+          <canvas ref="exportCanvas" />
         </div>
       </div>
     );
