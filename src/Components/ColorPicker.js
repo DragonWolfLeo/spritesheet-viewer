@@ -10,7 +10,7 @@ class ColorPicker extends React.Component {
     show = () => {
         // Show the component
         this.setState({visible: true});
-        const canvas = document.getElementById("pickerCanvas");
+        const {canvas} = this.refs;
         
         // Render current frame onto the canvas
         const {animation, renderFrame} = this.props.preview.current;
@@ -49,7 +49,7 @@ class ColorPicker extends React.Component {
                     <div className="w-100 h-100 flex justify-center">
                         <div className="overflow-auto flex h-100">
                             <div className="canvasContainer">
-                                <canvas id="pickerCanvas" onClick={this.onCanvasClick}/>
+                                <canvas ref="canvas" onClick={this.onCanvasClick}/>
                             </div>
                         </div>
                     </div>

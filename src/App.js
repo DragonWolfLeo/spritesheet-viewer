@@ -102,8 +102,8 @@ class App extends Component {
 
 
     const {animation, renderFrame} = this.preview.current;
-    const canvas = document.getElementById("exportCanvas");
-    const a = Object.assign({}, animation, {canvas: canvas}); // Make new animation for exportCanvas
+    const canvas = document.createElement("canvas");
+    const a = Object.assign({}, animation, {canvas}); // Make new animation for exportCanvas
 
     const gif = new GIF({
       workers: 4,
@@ -216,7 +216,6 @@ class App extends Component {
             accept=".png"
             onChange={this.onChooseSource}
           />
-          <canvas id="exportCanvas" className="bg-white" />
         </div>
       </div>
     );

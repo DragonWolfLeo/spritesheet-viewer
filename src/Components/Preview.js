@@ -56,7 +56,7 @@ class Preview extends React.Component {
 			// Don't interrupt preview with a loading screen
 			this.screens.changeTo("loading");
 		}
-		const canvas = document.getElementById("canvas");
+		const {canvas} = this.refs;
 		const image = new Image();
 		image.src = imagesrc;
 		image.onload = () => {
@@ -64,19 +64,19 @@ class Preview extends React.Component {
 			this.screens.changeTo("preview");
 
 			// Assume whether the sprite sheet is horizontal or vertical
-			const horizontal = image.width > image.height;
-			const {width, height} = image;
+			const {width: w, height: h} = image;
+			const horizontal = w > h;
 
 			// Init animation
-			const animation = {
+			const a = {
 				filename,
     			frame: 0,
     			image,
 				canvas,
 				horizontal,
-				fspan: horizontal ? height : width,
-				fthick: horizontal ? height : width,
-				srclength: horizontal ? width : height,
+				fspan: horizontal ? h : w,
+				fthick: horizontal ? h : w,
+				srclength: horizontal ? w : h,
 				trimR: 0,
 				trimL: 0,
 				trimU: 0,
@@ -87,20 +87,21 @@ class Preview extends React.Component {
 				forward: true,
 			};
 			// Apply locked parameters
-			Object.assign(animation,this.lockedParams);
+			Object.assign(a,this.lockedParams);
 
 			// Update parameters as well as syncing locked params
 			if(this.props.updateParameters){
-				this.props.updateParameters(animation, this.lockedParams);
+				this.props.updateParameters(a, this.lockedParams);
 			}
-			this.animation = animation;
-			this.animation.totalFrames = this.calcTotalFrames();
+
+			this.animation = a;
+			const totalFrames = this.calcTotalFrames(a);
 
 			this.createAnimateTask(this.animate());
 			this.setState({
-				totalFrames: this.animation.totalFrames,
+				totalFrames,
 				isError: false,
-				horizontal: horizontal,
+				horizontal,
 			});
 		}
 		image.onerror = () => {
@@ -110,15 +111,18 @@ class Preview extends React.Component {
 			this.screens.changeTo("upload");
 		};
 	}
-	calcTotalFrames = () => {
-		const a = this.animation;
-		return Math.ceil(a.srclength/a.fspan);
+	
+	calcTotalFrames = (a = this.animation) => {
+		const {srclength, fspan} = a;
+		const totalFrames = Math.ceil(srclength/fspan);
+		return a.totalFrames = totalFrames;
 	}
 
 	// Called by Parameters to set new settings
 	setNewProps = (props) => {
+		const a = this.animation;
 		Object.entries(props).forEach(item => {
-			this.animation[item[0]] = item[1];
+			a[item[0]] = item[1];
 			if(this.lockedParams[item[0]] !== undefined){
 				this.lockedParams[item[0]] = item[1];
 			}
@@ -126,10 +130,9 @@ class Preview extends React.Component {
 
 		// Update frame count if frame span or trim is changed
 		if(props.fspan){
-			const a = this.animation;
 			a.frame = 0;
-			a.totalFrames = this.calcTotalFrames();
-			this.setState({totalFrames: a.totalFrames});
+			const totalFrames = this.calcTotalFrames(a);
+			this.setState({totalFrames});
 		}
 		
 		// Update the frame
@@ -162,64 +165,75 @@ class Preview extends React.Component {
 
 	// Return an animating function
     animate = (frameAdvance = null) => () => {
-		const {animation} = this;
-		const {playback, totalFrames} = animation;
+		const {animation: a} = this;
+		const {playback, totalFrames} = a;
 		switch(playback){
 			default:
 				break;
 			case "r":
-				animation.forward = false;
+				a.forward = false;
 				break;
 			case "f":
-				animation.forward = true;
+				a.forward = true;
 		}
 
 		// Update frame counter
-		animation.frame += frameAdvance === null ? ( animation.forward ? 1 : -1) : frameAdvance;
+		a.frame += frameAdvance === null ? ( a.forward ? 1 : -1) : frameAdvance;
 		// Loop over if past range
 		const reversePlayback = frameAdvance === null && playback === "b";
-		if(animation.frame >= totalFrames){
+		if(a.frame >= totalFrames){
 			if(reversePlayback){ 
-				animation.forward = false; 
-				animation.frame = totalFrames-2;
+				a.forward = false; 
+				a.frame = totalFrames-2;
 			} else {
-				animation.frame = 0;
+				a.frame = 0;
 			}
-		}else if(animation.frame < 0){
+		}else if(a.frame < 0){
 			if(reversePlayback){ 
-				animation.forward = true; 
-				animation.frame = 1;
+				a.forward = true; 
+				a.frame = 1;
 			} else {
-				animation.frame = totalFrames-1;
+				a.frame = totalFrames-1;
 			}
 		}
 
 		// Update state
-		this.setState({frame: animation.frame});
+		this.setState({frame: a.frame});
 
 		// Cancel any existing animation request
-		if(animation.animReq !== null){
-			cancelAnimationFrame(animation.animReq);
+		if(a.animReq !== null){
+			cancelAnimationFrame(a.animReq);
 		}
 
 		// Make a new animation request
-		const {frame} = animation; // Declared here to stay in this scope
-		animation.animReq = requestAnimationFrame(()=>{
+		const {frame} = a; // Declared here to stay in this scope
+		a.animReq = requestAnimationFrame(()=>{
 			this.renderFrame(frame);
 		});
 	};
 	
 	// Draw frame to a canvas
-	renderFrame = (frame=null, animation=this.animation, fillBG=false) => {
+	renderFrame = (frame=null, a=this.animation, fillBG=false) => {
 		if(frame === null){
-			({frame} = animation);
+			({frame} = a);
 		}
-		const {canvas, image, horizontal, scale, fspan, fthick, trimR, trimL, trimU, trimD, forward, mirroring, flipping, transparent} = animation;
+		const {
+			canvas, 
+			horizontal: hz, 
+			scale, 
+			fspan, 
+			fthick, 
+			trimR, 
+			trimL, 
+			trimU, 
+			trimD, 
+			forward, 
+			mirroring, 
+			flipping,
+		} = a;
 		const ctx = canvas.getContext("2d");
-		const trimH = trimR + trimL;
-		const trimV = trimU + trimD;
-		const fw = (horizontal ? fspan : fthick) - trimH;
-		const fh = (!horizontal ? fspan : fthick) - trimV;
+		const fw = (hz ? fspan : fthick) - (trimR + trimL);
+		const fh = (!hz ? fspan : fthick) - (trimU + trimD);
 
 		// Check if size is valid
 		if(fw > 0 && fh > 0){ 
@@ -230,8 +244,8 @@ class Preview extends React.Component {
 			return;
 		}
 
-		const srcX = (horizontal ? fspan*frame : 0) + trimL;
-		const srcY = (!horizontal ? fspan*frame : 0) + trimU;
+		const srcX = (hz ? fspan*frame : 0) + trimL;
+		const srcY = (!hz ? fspan*frame : 0) + trimU;
 		const dir = forward ? "f" : "r";
 		const mirror = mirroring === "y" || mirroring === dir;
 		const flip = flipping === "y" || flipping === dir;
@@ -246,11 +260,12 @@ class Preview extends React.Component {
 			flip ? canvas.height : 0
 		);
 		if(fillBG){
-			ctx.fillStyle=transparent;
+			ctx.fillStyle=a.transparent;
 			ctx.fillRect(0,0,canvas.width,canvas.height);
 		}
-		ctx.drawImage(image,srcX,srcY,fw,fh,0,0,canvas.width,canvas.height);
+		ctx.drawImage(a.image,srcX,srcY,fw,fh,0,0,canvas.width,canvas.height);
 	}
+
 	controls = {
 		play: () => {
 			if(this.resumeTask){
@@ -289,7 +304,7 @@ class Preview extends React.Component {
 					<div className="resizeable box flex flex-column justify-between mb3">
 						<div className="overflow-auto flex h-100">
 							<div className="canvasContainer">
-								<canvas id="canvas"/>
+								<canvas ref="canvas"/>
 							</div>
 						</div>
 						<Controller 
