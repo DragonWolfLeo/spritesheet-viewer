@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import GIF from "gif.js.optimized";
+import "tachyons";
+import './CSS/App.css';
 import Preview from "./Components/Preview.js";
 import Parameters from "./Components/Parameters.js";
 import MenuButton from "./Components/MenuButton";
 import ColorPicker from "./Components/ColorPicker";
-import "tachyons";
-import './CSS/App.css';
 import About from './Components/About.js';
 
 
@@ -187,7 +187,7 @@ class App extends Component {
           </div>
           {
             this.state.imageLoaded ? 
-            (<div id="controlPanel" className="ml3 w-100" >
+            (<div id="controlPanel" className="ml3 mb3 w-100" >
               <div className={"box pa3"}>
                 <Parameters ref={this.parameters} preview={this.preview} pickColor={this.pickColor}/>
                 <MenuButton className="mb1 pv2" htmlFor="fileInput">Choose a file</MenuButton>
