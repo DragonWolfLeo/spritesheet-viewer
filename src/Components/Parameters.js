@@ -171,7 +171,7 @@ class Parameters extends React.Component {
 			<table className="mb3 w-100 bg-black-60">
                 <tbody>
                     {[
-                        this.createSelect("Mode", "mode",
+                        this.createSelect("Orientation", "mode",
                         {
                             onChange: this.onModeChange,
                         },
