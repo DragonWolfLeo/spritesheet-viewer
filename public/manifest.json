@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Spritesheet Viewer",
+  "name": "Spritesheet Viewer",
   "icons": [
     {
       "src": "favicon.ico",

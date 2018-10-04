@@ -8,7 +8,7 @@ class Parameters extends React.Component {
             lockedParams: {},
         }
         
-        this.paramsList = ["filename", "scale","delay","fps","fspan","trimR","trimL","trimU","trimD","playback","mirroring","flipping","transparent","horizontal"];
+        this.paramsList = ["filename","scale","delay","fps","fspan","trimR","trimL","trimU","trimD","playback","mirroring","flipping","transparent","horizontal"];
         this.lockedParams = {};
         // Create a list of functions that can be synced with each parameter input
         this.updateFnList = {};
@@ -25,7 +25,10 @@ class Parameters extends React.Component {
         if(animation){
             Object.keys(animation).forEach(item=>{
                 if(this.updateFnList[item]){
-                    this.updateFnList[item](animation[item]);
+                    this.updateFnList[item](
+                        animation[item],
+                        animation[item+"_max"] ? animation[item+"_max"] : null,
+                    );
                 }
             });
         }
@@ -35,10 +38,13 @@ class Parameters extends React.Component {
     updateInput = name => {
         const resultValue = name === "delay" ? (value => Math.round(1000/value)) : (value => value);
         name = name === "delay" ? "fps" : name;
-        return (value) =>{
+        return (value, max = null) =>{
             const input = document.getElementById(`${name}Input`);
             if(input){
                 input.value = resultValue(value);
+                if(max !== null) {
+                    input.max = max;
+                }
             }
         }
     }
@@ -55,6 +61,11 @@ class Parameters extends React.Component {
             o.value = value < min ? min : (value > max ? max : value);
             fn(event);
         }
+    }
+
+    // Mode select input change event
+    onModeChange = (event) => {
+        this.props.preview.current.setMode(event.target.value);
     }
 
     // Default input change event
@@ -130,7 +141,15 @@ class Parameters extends React.Component {
     // Template for creating an input parameter row
     createInput(label, id, props, special){
         return (
-            this.createParam(label, id, (<div className="w-100"><input id={id+"Input"} className="w-100" {...props}/></div>), special)
+            this.createParam(label, id, (
+                <div className="w-100">
+                    <input 
+                        id={id+"Input"} 
+                        className={props.type === "checkbox" ? "" : "w-100"} 
+                        {...props}
+                    />
+                </div>
+            ), special)
         );
     }
     // Template for creating an select parameter row
@@ -152,6 +171,15 @@ class Parameters extends React.Component {
 			<table className="mb3 w-100 bg-black-60">
                 <tbody>
                     {[
+                        this.createSelect("Mode", "mode",
+                        {
+                            onChange: this.onModeChange,
+                        },
+                        {
+                            auto: "Auto",
+                            horizontal: "Horizontal",
+                            vertical: "Vertical",
+                        }, null),
                         this.createInput("Name", "filename",
                         {
                             type: "text",
@@ -182,6 +210,7 @@ class Parameters extends React.Component {
                             min: "1",
                             defaultValue: "30",
                             onChange: this.onNumberChange("fspan"),
+                            onBlur: this.onInvalidNum(this.onNumberChange("fspan")),
                         }),
                         ["Right", "Left", "Up", "Down"].map(item=>{
                             const initial = item.substr(0,1);

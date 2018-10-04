@@ -14,11 +14,13 @@ class Preview extends React.Component {
 		this.animateTask = null;
 		this.resumeTask = null;
 		this.animation = null;
+		this.loadImage = null;
 		this.lockedParams = {
 			scale: 2,
 			delay: 33,
 			transparent: "#FF00FF",
 		}
+		this.mode = "auto";
 
 		// Screen management
 		this.screens = ["preview", "upload", "loading"];
@@ -59,22 +61,31 @@ class Preview extends React.Component {
 		const {canvas} = this.refs;
 		const image = new Image();
 		image.src = imagesrc;
-		image.onload = () => {
+		this.loadImage = (newMode = null) => () => {
 			this.props.setImageLoaded();
 			this.screens.changeTo("preview");
 
-			// Assume whether the sprite sheet is horizontal or vertical
+			// Determine whether the sprite sheet is horizontal or vertical
 			const {width: w, height: h} = image;
-			const horizontal = w > h;
+			const horizontal = this.mode === "auto" ? w > h : this.mode === "horizontal";
+
+			// If setting a new mode but has same orientation, cancel
+			if(newMode){
+				if(horizontal === this.animation.horizontal){
+					return;
+				}
+			}
 
 			// Init animation
 			const a = {
 				filename,
-    			frame: 0,
+				frame: 0,
+				prevFrame: -1,
     			image,
 				canvas,
 				horizontal,
-				fspan: horizontal ? h : w,
+				fspan: w > h ? h : w,
+				fspan_max: horizontal? w : h,
 				fthick: horizontal ? h : w,
 				srclength: horizontal ? w : h,
 				trimR: 0,
@@ -86,6 +97,7 @@ class Preview extends React.Component {
 				mirroring: "n",
 				forward: true,
 			};
+
 			// Apply locked parameters
 			Object.assign(a,this.lockedParams);
 
@@ -104,6 +116,7 @@ class Preview extends React.Component {
 				horizontal,
 			});
 		}
+		image.onload = this.loadImage(null);
 		image.onerror = () => {
 			clearTimeout(this.animateTask);
 			this.props.setImageLoaded(false);
@@ -118,6 +131,16 @@ class Preview extends React.Component {
 		return a.totalFrames = totalFrames;
 	}
 
+	// Called by Parameters to set new mode
+	setMode = (newMode) => {
+		if(this.mode !== newMode){
+			this.mode = newMode;
+			if(this.loadImage){
+				this.loadImage(newMode)();
+			}
+		}
+	}
+
 	// Called by Parameters to set new settings
 	setNewProps = (props) => {
 		const a = this.animation;
@@ -129,14 +152,14 @@ class Preview extends React.Component {
 		});
 
 		// Update frame count if frame span or trim is changed
-		if(props.fspan){
+		if(props.fspan || props.horizontal){
 			a.frame = 0;
 			const totalFrames = this.calcTotalFrames(a);
 			this.setState({totalFrames});
 		}
 		
 		// Update the frame
-		this.animate(0)();
+		this.animate(0, true)();
 	}
 
 	// Called by Parameters to lock or unlock a parameter
@@ -164,7 +187,7 @@ class Preview extends React.Component {
 	}
 
 	// Return an animating function
-    animate = (frameAdvance = null) => () => {
+    animate = (frameAdvance = null, forceUpdate = false) => () => {
 		const {animation: a} = this;
 		const {playback, totalFrames} = a;
 		switch(playback){
@@ -200,16 +223,18 @@ class Preview extends React.Component {
 		// Update state
 		this.setState({frame: a.frame});
 
-		// Cancel any existing animation request
-		if(a.animReq !== null){
-			cancelAnimationFrame(a.animReq);
-		}
-
 		// Make a new animation request
-		const {frame} = a; // Declared here to stay in this scope
-		a.animReq = requestAnimationFrame(()=>{
-			this.renderFrame(frame);
-		});
+		const {frame, prevFrame} = a; // Declared here to stay in this scope
+		if(frame !== prevFrame || forceUpdate){
+			a.prevFrame = frame;
+			// Cancel any existing animation request
+			if(a.animReq !== null){
+				cancelAnimationFrame(a.animReq);
+			}
+			a.animReq = requestAnimationFrame(()=>{
+				this.renderFrame(frame);
+			});
+		}
 	};
 	
 	// Draw frame to a canvas
