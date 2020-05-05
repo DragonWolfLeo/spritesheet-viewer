@@ -240,6 +240,7 @@ class Parameters extends React.Component {
                             {
                                 n: "No",
                                 y: "Yes",
+                                a: "Alternating",
                                 f: "When forward",
                                 r: "When reversed",
                             })

@@ -114,18 +114,23 @@ class App extends Component {
     this.gif = gif;
 
     // Render frames
-    let i = a.playback === "r" ? a.totalFrames-1 : 0;
-    a.forward = a.playback !== "r";
-    do {
-      renderFrame(i,a, true);
-      gif.addFrame(canvas, {copy: true, delay: a.delay}); // Copy pixels from canvas
-      i += a.forward ? 1 : -1;
-      if(i >= a.totalFrames && a.playback === "b" ){
-					a.forward = false; 
-					i = a.totalFrames-2;
-			}
+    a.alt = false;
+    let doubleRender = a.mirroring === "a" || a.flipping === "a"; // Render twice for alternating
+    for(let renders = 0; renders < (doubleRender ? 2 : 1); renders++){
+      let i = a.playback === "r" ? a.totalFrames-1 : 0;
+      a.forward = a.playback !== "r";
+      do {
+        renderFrame(i,a, true);
+        gif.addFrame(canvas, {copy: true, delay: a.delay}); // Copy pixels from canvas
+        i += a.forward ? 1 : -1;
+        if(i >= a.totalFrames && a.playback === "b" ){
+            a.forward = false; 
+            i = a.totalFrames-2;
+        }
 
-    } while(a.playback === "f" ? i < a.totalFrames : i > 0 );
+      } while(a.playback === "f" ? i < a.totalFrames : i > 0 );
+      a.alt = ! a.alt;
+    }
 
     gif.on('finished', blob => {
       this.download(blob, `${a.filename || "untitled" }.gif`);

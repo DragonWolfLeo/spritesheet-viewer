@@ -95,6 +95,7 @@ class Preview extends React.Component {
 				playback: "f",
 				flipping: "n",
 				mirroring: "n",
+				alt: false,
 				forward: true,
 			};
 
@@ -210,6 +211,7 @@ class Preview extends React.Component {
 				a.frame = totalFrames-2;
 			} else {
 				a.frame = 0;
+				a.alt = !a.alt;
 			}
 		}else if(a.frame < 0){
 			if(reversePlayback){ 
@@ -218,6 +220,7 @@ class Preview extends React.Component {
 			} else {
 				a.frame = totalFrames-1;
 			}
+			a.alt = !a.alt;
 		}
 
 		// Update state
@@ -255,6 +258,7 @@ class Preview extends React.Component {
 			forward, 
 			mirroring, 
 			flipping,
+			alt,
 		} = a;
 		const ctx = canvas.getContext("2d");
 		const fw = (hz ? fspan : fthick) - (trimR + trimL);
@@ -272,8 +276,8 @@ class Preview extends React.Component {
 		const srcX = (hz ? fspan*frame : 0) + trimL;
 		const srcY = (!hz ? fspan*frame : 0) + trimU;
 		const dir = forward ? "f" : "r";
-		const mirror = mirroring === "y" || mirroring === dir;
-		const flip = flipping === "y" || flipping === dir;
+		const mirror = mirroring === "y" || mirroring === dir || (mirroring === "a" && alt);
+		const flip = flipping === "y" || flipping === dir || (flipping === "a" && alt);
 		// Draw to canvas
 		ctx.imageSmoothingEnabled = false;
 		ctx.setTransform(
